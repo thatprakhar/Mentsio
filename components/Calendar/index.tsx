@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Modal, DatePickerIOS } from 'react-native';
 import Selected from '../Selected';
 import { firebase } from '../../firebase/config';
 
@@ -18,6 +18,7 @@ interface CalendarState {
     selectedDate: number
     loading: boolean
     showMonthSelection: boolean
+    showYearSelection: boolean
 }
 
 export default class Calendar extends React.Component<CalendarProps, CalendarState> {
@@ -33,7 +34,8 @@ export default class Calendar extends React.Component<CalendarProps, CalendarSta
             showSelectors: false,
             selectedDate: -1,
             loading: true,
-            showMonthSelection: false
+            showMonthSelection: false,
+            showYearSelection: false
         }
     }
 
@@ -59,7 +61,7 @@ export default class Calendar extends React.Component<CalendarProps, CalendarSta
         .then(snapshot => {
             const data = snapshot.docs.map(doc => doc.data());
             data.forEach(item => {
-                if (item.month == this.state.month) {
+                if (item.month == this.state.month && item.year == this.state.year) {
                     colorMap.set(item.date, item.color);
                     if (item.note !== undefined) {
                         noteMap.set(item.date, item.note);
@@ -133,6 +135,39 @@ export default class Calendar extends React.Component<CalendarProps, CalendarSta
     }
 
 
+    renderYearSelection = () => {
+        let arr = []
+
+        for (let i = new Date().getFullYear(); i >= new Date().getFullYear() - 3; i--) {
+            arr.push(
+                <TouchableOpacity
+                    onPress={() => {
+                        this.setState({
+                        year: i,
+                        showYearSelection: false
+                    })
+                    this.getData();
+                    }}
+                    key={i}
+                >
+                    <Text
+                        style={{
+                            ...styles.month,
+                            marginTop: '6%',
+                            marginLeft: '5%'
+                        }}
+                    >{i}</Text>
+            </TouchableOpacity>
+            )
+        }
+
+        return (
+            <View>
+                {arr}
+            </View>
+        )
+    }
+
     renderDates = (num: number) => {
         const { colorMap, loading } = this.state;
         if (loading) {
@@ -178,7 +213,13 @@ export default class Calendar extends React.Component<CalendarProps, CalendarSta
                     >
                         <Text style={styles.month}>{this.mapNumToMonth(month)}</Text>
                     </TouchableOpacity>
-                    <Text style={styles.year}>{year}</Text>
+                    <TouchableOpacity
+                        onPress={() => this.setState({
+                            showYearSelection: true
+                        })}
+                    >
+                        <Text style={styles.year}>{year}</Text>
+                    </TouchableOpacity>
                 </View>
                 {
                     <View style={styles.dates}>
@@ -227,6 +268,7 @@ export default class Calendar extends React.Component<CalendarProps, CalendarSta
                                         })
                                         this.getData();
                                         }}
+                                        key={m}
                                     >
                                         <Text
                                             style={{
@@ -237,6 +279,22 @@ export default class Calendar extends React.Component<CalendarProps, CalendarSta
                                         >{m}</Text>
                                     </TouchableOpacity>
                                     )
+                            }
+                        </View>
+                    </Modal>
+                }
+                {
+                    this.state.showYearSelection && 
+                    <Modal
+                        animationType="slide"
+                        transparent={true}
+                        style={styles.modal}
+                    >
+                        <View
+                            style={styles.monthPicker}
+                        >
+                            {
+                                this.renderYearSelection()
                             }
                         </View>
                     </Modal>
