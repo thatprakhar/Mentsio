@@ -1,0 +1,14 @@
+{
+  "files": {
+    "app.js": "/static/js/bundle.js",
+    "app.js.map": "/static/js/bundle.js.map",
+    "favicon-16.png": "/favicon-16.png",
+    "favicon-32.png": "/favicon-32.png",
+    "favicon.ico": "/favicon.ico",
+    "index.html": "/index.html",
+    "manifest.json": "/manifest.json"
+  },
+  "entrypoints": [
+    "static/js/bundle.js"
+  ]
+}
